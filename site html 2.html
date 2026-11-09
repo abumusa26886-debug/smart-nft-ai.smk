@@ -1,0 +1,1694 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Earn Matrix - Smart NFT Platform</title>
+    <!-- Google Fonts & Font Awesome Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Plus Jakarta Sans', 'Roboto', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        :root {
+            --bg-main: #0c0f1e;
+            --bg-card: #141828;
+            --gold: #ffd700;
+            --gold-gradient: linear-gradient(135deg, #ffd700 0%, #d4af37 50%, #996515 100%);
+            --blue-accent: #38bdf8;
+            --text-muted: #a0a5b5;
+            --success: #22c55e;
+            --danger: #ef4444;
+        }
+
+        body {
+            background-color: var(--bg-main);
+            color: #ffffff;
+            min-height: 100vh;
+            overflow-x: hidden;
+            display: flex;
+            justify-content: center;
+        }
+
+        /* Responsive Mobile Container Layout */
+        .app-viewport {
+            width: 100%;
+            max-width: 440px;
+            min-height: 100vh;
+            position: relative;
+            background: #080a10;
+            box-shadow: 0 0 40px rgba(0, 0, 0, 0.8);
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Screen Manager */
+        .screen-view {
+            display: none;
+            width: 100%;
+            animation: fadeIn 0.3s ease-in-out forwards;
+        }
+
+        .screen-view.active-screen {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ----------------------------------------------------
+           1. AUTH SCREEN (LOGIN & REGISTER)
+        ---------------------------------------------------- */
+        #screen-auth {
+            padding: 30px 20px;
+            background: radial-gradient(circle at top, #1a1e2e 0%, #08090d 100%);
+            min-height: 100vh;
+        }
+
+        .auth-container {
+            background: rgba(18, 22, 36, 0.85);
+            border: 1px solid rgba(255, 215, 0, 0.25);
+            border-radius: 28px;
+            padding: 24px 20px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.9), 0 0 30px rgba(212, 175, 55, 0.12);
+            backdrop-filter: blur(16px);
+        }
+
+        .top-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .brand-title {
+            font-size: 15px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #fff6cc 0%, #ffd700 50%, #cca010 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: 0.8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+        }
+
+        .brand-title i {
+            color: #ffd700;
+            -webkit-text-fill-color: initial;
+        }
+
+        .lang-selector {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 215, 0, 0.3);
+            color: #ffd700;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            outline: none;
+            cursor: pointer;
+        }
+
+        /* Asymmetric NFT Preview Header */
+        .nft-grid-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+            padding: 5px 2px;
+        }
+
+        .nft-card-item {
+            position: relative;
+            border-radius: 14px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 215, 0, 0.4);
+            box-shadow: 0 8px 18px rgba(0, 0, 0, 0.7);
+            background: #121624;
+            transition: 0.3s;
+        }
+
+        .nft-card-item:nth-child(1) { transform: translateY(4px) rotate(-3deg); }
+        .nft-card-item:nth-child(2) { transform: translateY(-4px) rotate(2deg); }
+        .nft-card-item:nth-child(3) { transform: translateY(5px) rotate(-2deg); }
+
+        .nft-card-item img {
+            width: 100%;
+            height: 85px;
+            object-fit: cover;
+            display: block;
+        }
+
+        .nft-label {
+            text-align: center;
+            background: rgba(10, 12, 18, 0.95);
+            color: #ffd700;
+            font-size: 10px;
+            font-weight: 800;
+            padding: 3px 0;
+            letter-spacing: 1.5px;
+            border-top: 1px solid rgba(255, 215, 0, 0.2);
+        }
+
+        /* Tab Switcher */
+        .tab-buttons {
+            display: flex;
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 14px;
+            padding: 4px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            background: transparent;
+            color: #8c93a8;
+            font-size: 13px;
+            font-weight: 700;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .tab-btn.active {
+            background: var(--gold-gradient);
+            color: #0d0f17;
+            box-shadow: 0 4px 15px rgba(212, 175, 55, 0.4);
+        }
+
+        .form-box { display: none; }
+        .form-box.active-form { display: block; }
+
+        .form-group { margin-bottom: 14px; }
+        .form-group label {
+            display: block;
+            font-size: 11px;
+            color: #b3b9c9;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+
+        .input-wrapper { position: relative; }
+        .input-wrapper i {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #ffd700;
+            font-size: 13px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 11px 14px 11px 40px;
+            background: rgba(10, 13, 22, 0.7);
+            border: 1px solid rgba(255, 215, 0, 0.2);
+            border-radius: 12px;
+            color: #fff;
+            font-size: 12px;
+            outline: none;
+            transition: 0.3s;
+        }
+
+        .form-control:focus {
+            border-color: #ffd700;
+            box-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 12px;
+            background: var(--gold-gradient);
+            border: none;
+            border-radius: 12px;
+            color: #08090d;
+            font-size: 14px;
+            font-weight: 800;
+            cursor: pointer;
+            margin-top: 8px;
+            letter-spacing: 0.5px;
+            box-shadow: 0 5px 18px rgba(212, 175, 55, 0.35);
+            transition: 0.3s;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 22px rgba(212, 175, 55, 0.5);
+        }
+
+        /* ----------------------------------------------------
+           COMMON APP NAVBAR (TOP)
+        ---------------------------------------------------- */
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 18px;
+            background: rgba(15, 18, 28, 0.95);
+            border-bottom: 1px solid rgba(255, 215, 0, 0.2);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+        }
+
+        .brand-logo {
+            font-size: 16px;
+            font-weight: 800;
+            color: #ffd700;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .user-profile-badge {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(255, 215, 0, 0.1);
+            padding: 5px 12px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 215, 0, 0.3);
+            font-size: 12px;
+            font-weight: 700;
+            color: #ffd700;
+            cursor: pointer;
+        }
+
+        /* ----------------------------------------------------
+           PAGE CONTENT & DASHBOARDS
+        ---------------------------------------------------- */
+        .page-content {
+            padding: 15px 16px 85px 16px;
+        }
+
+        .hero-nft-title {
+            text-align: center;
+            margin: 15px 0 10px 0;
+        }
+
+        .hero-nft-title h1 {
+            font-size: 58px;
+            font-weight: 900;
+            letter-spacing: 4px;
+            background: linear-gradient(135deg, #ffffff 0%, #ffd700 50%, #b8860b 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            line-height: 1;
+        }
+
+        .hero-nft-title p {
+            font-size: 11px;
+            color: #a0a5b5;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-top: 4px;
+            font-weight: 600;
+        }
+
+        .stats-burj-banner {
+            position: relative;
+            border-radius: 22px;
+            overflow: hidden;
+            padding: 24px 16px;
+            margin: 16px 0;
+            border: 1px solid rgba(255, 215, 0, 0.35);
+            background: linear-gradient(180deg, rgba(8, 10, 16, 0.72) 0%, rgba(18, 22, 36, 0.94) 100%),
+                        url('https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=800&q=80') center/cover no-repeat;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.8);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .stat-card {
+            background: rgba(10, 13, 22, 0.85);
+            border: 1px solid rgba(255, 215, 0, 0.3);
+            border-radius: 14px;
+            padding: 14px 10px;
+            text-align: center;
+            backdrop-filter: blur(8px);
+        }
+
+        .stat-icon { font-size: 18px; color: #ffd700; margin-bottom: 5px; }
+        .stat-number { font-size: 20px; font-weight: 800; color: #ffffff; }
+        .stat-label { font-size: 10px; color: #b3b9c9; text-transform: uppercase; }
+
+        /* Action Buttons */
+        .action-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .btn-action {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 12px;
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            border: none;
+            transition: 0.3s;
+        }
+
+        .btn-deposit {
+            background: var(--gold-gradient);
+            color: #080a10;
+            box-shadow: 0 6px 16px rgba(212, 175, 55, 0.35);
+        }
+
+        .btn-withdraw {
+            background: rgba(255, 255, 255, 0.05);
+            color: #ffd700;
+            border: 1px solid rgba(255, 215, 0, 0.4);
+        }
+
+        .btn-action:hover { transform: translateY(-2px); }
+
+        .section-header {
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .section-header h2 {
+            font-size: 14px;
+            font-weight: 700;
+            color: #ffd700;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .info-cards-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .info-card {
+            background: rgba(18, 22, 36, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-left: 3px solid #ffd700;
+            border-radius: 12px;
+            padding: 12px 14px;
+            display: flex;
+            gap: 12px;
+        }
+
+        .info-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 10px;
+            background: rgba(255, 215, 0, 0.12);
+            color: #ffd700;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+
+        .info-content h3 { font-size: 12px; font-weight: 700; color: #fff; margin-bottom: 2px; }
+        .info-content p { font-size: 11px; color: #9aa1b5; line-height: 1.4; }
+
+        /* ----------------------------------------------------
+           NFT VIP LEVEL SCREEN
+        ---------------------------------------------------- */
+        .status-info-section {
+            background: linear-gradient(135deg, #161b2c 0%, #0d101a 100%);
+            border-radius: 12px;
+            padding: 14px;
+            margin-bottom: 18px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .level-status-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            text-align: center;
+            gap: 6px;
+        }
+
+        .status-item span:first-child { font-size: 11px; color: var(--text-muted); display: block; }
+        .status-item span:last-child { font-size: 13px; font-weight: 700; color: #fff; }
+
+        .level-cards-container {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .level-card {
+            background: linear-gradient(135deg, #1a1e2e 0%, #101321 100%);
+            border: 1px solid rgba(255, 215, 0, 0.15);
+            border-radius: 14px;
+            padding: 12px 14px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .level-card:hover {
+            border-color: #ffd700;
+            transform: translateX(3px);
+        }
+
+        .card-left { display: flex; align-items: center; gap: 12px; }
+        .level-icon-wrapper {
+            width: 58px;
+            height: 58px;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .level-icon-wrapper img { width: 100%; height: 100%; object-fit: cover; }
+        .level-title { font-size: 14px; font-weight: 700; color: #ffffff; }
+        .trx-info { font-size: 11px; color: #38bdf8; font-weight: 600; }
+        .card-right { display: flex; align-items: center; gap: 10px; }
+        .medal-icon { width: 24px; height: 24px; font-size: 20px; color: #ffd700; display:flex; align-items:center; justify-content:center;}
+
+        /* ----------------------------------------------------
+           PROFILE SCREEN
+        ---------------------------------------------------- */
+        .top-earnings-bar {
+            background: #141828;
+            padding: 10px 16px;
+            font-size: 12px;
+            color: #ffd700;
+            font-weight: 600;
+            border-bottom: 1px solid rgba(255, 215, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .user-greeting {
+            font-size: 17px;
+            font-weight: 800;
+            color: #ffffff;
+            margin: 10px 0 12px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .profile-card {
+            background: linear-gradient(135deg, #161b2c 0%, #0d101a 100%);
+            border-radius: 14px;
+            padding: 14px;
+            margin-bottom: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .profile-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+            font-size: 12.5px;
+        }
+
+        .profile-row:last-child { border-bottom: none; }
+        .p-label { color: var(--text-muted); }
+        .p-value { font-weight: 600; color: #ffffff; }
+
+        .btn-recharge-green {
+            background: linear-gradient(135deg, #a8ff78 0%, #78ffd6 100%);
+            color: #080a10;
+        }
+
+        .btn-withdraw-pink {
+            background: linear-gradient(135deg, #fce38a 0%, #f38181 100%);
+            color: #080a10;
+        }
+
+        .revenue-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 14px;
+        }
+
+        .revenue-box {
+            background: #141828;
+            border-radius: 12px;
+            padding: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .revenue-box.full-width { grid-column: span 2; }
+        .rev-label { font-size: 11px; color: #a0a5b5; margin-bottom: 4px; }
+        .rev-value { font-size: 14px; font-weight: 700; color: #38bdf8; }
+
+        .nft-earning-banner {
+            background: #121626;
+            border: 1px solid rgba(56, 189, 248, 0.3);
+            border-radius: 10px;
+            padding: 10px;
+            text-align: center;
+            font-size: 12px;
+            font-weight: 600;
+            color: #38bdf8;
+            margin-bottom: 12px;
+        }
+
+        .nft-preview-scroll {
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
+            padding-bottom: 8px;
+            margin-bottom: 18px;
+            scrollbar-width: none;
+        }
+
+        .nft-preview-scroll::-webkit-scrollbar { display: none; }
+        .nft-mini-card {
+            min-width: 75px;
+            height: 75px;
+            border-radius: 10px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 215, 0, 0.3);
+            flex-shrink: 0;
+        }
+
+        .nft-mini-card img { width: 100%; height: 100%; object-fit: cover; }
+
+        .menu-list {
+            background: #141828;
+            border-radius: 14px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            margin-bottom: 20px;
+        }
+
+        .menu-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 13px 16px;
+            color: #ffffff;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+            font-size: 13px;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        .menu-item:hover { background: rgba(255, 255, 255, 0.03); }
+        .menu-left { display: flex; align-items: center; gap: 12px; }
+        .menu-left i { width: 18px; text-align: center; color: #0ea5e9; }
+        .menu-item i.fa-chevron-right { color: #64748b; font-size: 11px; }
+
+        /* ----------------------------------------------------
+           ADMIN PANEL SCREEN
+        ---------------------------------------------------- */
+        .admin-badge {
+            background: #ef4444;
+            color: #fff;
+            font-size: 10px;
+            font-weight: 800;
+            padding: 3px 8px;
+            border-radius: 6px;
+            letter-spacing: 1px;
+        }
+
+        .admin-card {
+            background: #141828;
+            border: 1px solid rgba(255, 215, 0, 0.2);
+            border-radius: 14px;
+            padding: 14px;
+            margin-bottom: 14px;
+        }
+
+        .admin-card h3 {
+            font-size: 13px;
+            color: #ffd700;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .admin-list-item {
+            background: rgba(10, 13, 22, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 10px;
+            padding: 10px;
+            margin-bottom: 8px;
+            font-size: 12px;
+        }
+
+        .admin-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .btn-adm {
+            flex: 1;
+            padding: 6px 10px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 700;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-adm-approve { background: var(--success); color: #fff; }
+        .btn-adm-reject { background: var(--danger); color: #fff; }
+
+        /* ----------------------------------------------------
+           BOTTOM NAVIGATION BAR
+        ---------------------------------------------------- */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            max-width: 440px;
+            background: #0d101a;
+            border-top: 1px solid rgba(255, 215, 0, 0.2);
+            display: flex;
+            justify-content: space-around;
+            padding: 10px 0;
+            z-index: 100;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 3px;
+            color: #71788d;
+            font-size: 10px;
+            text-decoration: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .nav-item.active, .nav-item:hover { color: #ffd700; }
+        .nav-item i { font-size: 17px; }
+
+        /* Floating Chat Button */
+        .floating-chat-btn {
+            position: fixed;
+            bottom: 75px;
+            right: 15px;
+            width: 46px;
+            height: 46px;
+            background-color: #007bff;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #ffffff;
+            font-size: 20px;
+            box-shadow: 0 4px 15px rgba(0, 123, 255, 0.5);
+            cursor: pointer;
+            z-index: 95;
+            border: none;
+        }
+
+        /* ----------------------------------------------------
+           MODAL SYSTEM (RECHARGE, WITHDRAW, DETAILS, ETC.)
+        ---------------------------------------------------- */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.85);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 200;
+            padding: 16px;
+        }
+
+        .modal-overlay.active-modal {
+            display: flex;
+        }
+
+        .modal-box {
+            background: #141828;
+            border: 1px solid rgba(255, 215, 0, 0.3);
+            border-radius: 18px;
+            width: 100%;
+            max-width: 380px;
+            padding: 22px;
+            position: relative;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.8);
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 14px;
+            right: 16px;
+            color: #a0a5b5;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .modal-title {
+            font-size: 15px;
+            color: #ffd700;
+            font-weight: 700;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .tx-badge {
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 700;
+        }
+        .tx-badge.Pending { background: #eab308; color: #000; }
+        .tx-badge.Approved { background: #22c55e; color: #fff; }
+        .tx-badge.Rejected { background: #ef4444; color: #fff; }
+    </style>
+</head>
+<body>
+
+    <div class="app-viewport">
+
+        <!-- ==============================================
+             1. LOGIN & REGISTER VIEW (INITIAL SCREEN)
+        ============================================== -->
+        <div id="screen-auth" class="screen-view active-screen">
+            <div class="auth-container">
+                <div class="top-header">
+                    <span class="brand-title" onclick="triggerAdminSecret()"><i class="fa-solid fa-gem"></i> EARN MATRIX</span>
+                    <select class="lang-selector" onchange="toggleLanguage(this.value)">
+                        <option value="bn" selected>বাংলা</option>
+                        <option value="en">English</option>
+                    </select>
+                </div>
+
+                <!-- 3 Top Wavy NFT Cards -->
+                <div class="nft-grid-container">
+                    <div class="nft-card-item">
+                        <img src="https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?w=300&q=80" alt="NFT 1">
+                        <div class="nft-label">NFT AI</div>
+                    </div>
+                    <div class="nft-card-item">
+                        <img src="https://images.unsplash.com/photo-1634973357973-f2ed2657db3c?w=300&q=80" alt="NFT 2">
+                        <div class="nft-label">NFT APES</div>
+                    </div>
+                    <div class="nft-card-item">
+                        <img src="https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=300&q=80" alt="NFT 3">
+                        <div class="nft-label">NFT MATRIX</div>
+                    </div>
+                </div>
+
+                <!-- Tabs -->
+                <div class="tab-buttons">
+                    <button id="btn-login-tab" class="tab-btn active" onclick="switchAuthTab('login')">লগইন</button>
+                    <button id="btn-reg-tab" class="tab-btn" onclick="switchAuthTab('register')">রেজিস্ট্রেশন</button>
+                </div>
+
+                <!-- Login Form -->
+                <div id="form-login" class="form-box active-form">
+                    <form onsubmit="handleAuthSubmit(event, 'login')">
+                        <div class="form-group">
+                            <label>মোবাইল নাম্বার / একাউন্ট</label>
+                            <div class="input-wrapper">
+                                <i class="fa-solid fa-phone"></i>
+                                <input type="text" id="login-account" class="form-control" placeholder="01XXXXXXXXX" value="01712345678" required>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>লগইন পাসওয়ার্ড</label>
+                            <div class="input-wrapper">
+                                <i class="fa-solid fa-lock"></i>
+                                <input type="password" id="login-pass" class="form-control" placeholder="পাসওয়ার্ড লিখুন" value="123456" required>
+                            </div>
+                        </div>
+
+                        <div style="text-align: right; margin-bottom: 12px;">
+                            <a href="javascript:void(0)" onclick="openModal('chat-modal')" style="color: #a0a5b5; font-size: 11px; text-decoration: none;">পাসওয়ার্ড ভুলে গেছেন?</a>
+                        </div>
+
+                        <button type="submit" class="submit-btn">লগইন করুন</button>
+                    </form>
+                </div>
+
+                <!-- Register Form -->
+                <div id="form-register" class="form-box">
+                    <form onsubmit="handleAuthSubmit(event, 'register')">
+                        <div class="form-group">
+                            <label>ইউজারনেম / পুরো নাম</label>
+                            <div class="input-wrapper">
+                                <i class="fa-solid fa-user"></i>
+                                <input type="text" id="reg-name" class="form-control" placeholder="যেমন: Siam009" required>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>মোবাইল নাম্বার</label>
+                            <div class="input-wrapper">
+                                <i class="fa-solid fa-phone"></i>
+                                <input type="tel" id="reg-phone" class="form-control" placeholder="01XXXXXXXXX" required>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>লগইন পাসওয়ার্ড</label>
+                            <div class="input-wrapper">
+                                <i class="fa-solid fa-lock"></i>
+                                <input type="password" id="reg-pass" class="form-control" placeholder="কমপক্ষে ৬ ডিজিট" required>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>পেমেন্ট সিকিউরিটি পিন (উত্তোলনের জন্য)</label>
+                            <div class="input-wrapper">
+                                <i class="fa-solid fa-key"></i>
+                                <input type="password" id="reg-pin" maxlength="6" class="form-control" placeholder="৬ ডিজিটের গোপন পিন" required>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>রেফারেল কোড (ঐচ্ছিক)</label>
+                            <div class="input-wrapper">
+                                <i class="fa-solid fa-users"></i>
+                                <input type="text" id="reg-ref" class="form-control" value="SMART-AI-1654">
+                            </div>
+                        </div>
+
+                        <button type="submit" class="submit-btn">রেজিস্ট্রেশন সম্পন্ন করুন</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==============================================
+             MAIN APP WRAPPER (POST LOGIN SCREENS)
+        ============================================== -->
+        <div id="main-app-container" style="display: none;">
+
+            <!-- Fixed Header -->
+            <div class="navbar">
+                <div class="brand-logo" onclick="triggerAdminSecret()">
+                    <i class="fa-solid fa-gem"></i> EARN MATRIX
+                </div>
+                <div class="user-profile-badge" onclick="navigateTo('screen-profile')">
+                    <i class="fa-solid fa-wallet"></i> <span id="nav-balance">0.00 TRX</span>
+                </div>
+            </div>
+
+            <!-- SCREEN 1: HOME DASHBOARD -->
+            <div id="screen-home" class="screen-view active-screen">
+                <div class="page-content">
+                    <div class="hero-nft-title">
+                        <h1>NFT</h1>
+                        <p>Digital Asset Earnings Hub</p>
+                    </div>
+
+                    <!-- Burj Khalifa Stats Banner -->
+                    <div class="stats-burj-banner">
+                        <div class="stats-grid">
+                            <div class="stat-card">
+                                <div class="stat-icon"><i class="fa-solid fa-users"></i></div>
+                                <div class="stat-number" id="stats-users">1654</div>
+                                <div class="stat-label">সক্রিয় ইউজার</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-icon"><i class="fa-solid fa-sack-dollar"></i></div>
+                                <div class="stat-number" id="stats-commission">84,920</div>
+                                <div class="stat-label">মোট পেইড কমিশন (TRX)</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="action-buttons">
+                        <button class="btn-action btn-deposit" onclick="openModal('recharge-modal')">
+                            <i class="fa-solid fa-wallet"></i> রিচার্জ
+                        </button>
+                        <button class="btn-action btn-withdraw" onclick="openModal('withdraw-modal')">
+                            <i class="fa-solid fa-arrow-up-from-bracket"></i> উত্তোলন
+                        </button>
+                    </div>
+
+                    <!-- How NFT Income Works -->
+                    <div class="section-header">
+                        <h2><i class="fa-solid fa-circle-info"></i> এনএফটি আয়ের নিয়মাবলী</h2>
+                    </div>
+
+                    <div class="info-cards-grid">
+                        <div class="info-card">
+                            <div class="info-icon"><i class="fa-solid fa-chart-line"></i></div>
+                            <div class="info-content">
+                                <h3>১. অটোমেটেড এনএফটি ট্রেডিং</h3>
+                                <p>আমাদের এআই এলগরিদম প্রতিদিন স্বয়ংক্রিয়ভাবে প্রফিট জেনারেট করে আপনার একাউন্টে যোগ করে।</p>
+                            </div>
+                        </div>
+                        <div class="info-card">
+                            <div class="info-icon"><i class="fa-solid fa-hand-holding-dollar"></i></div>
+                            <div class="info-content">
+                                <h3>২. স্টেকিং ও রয়্যালটি আর্নিং</h3>
+                                <p>আপনার পছন্দের ভিআইপি কার্ডটি সক্রিয় রাখুন এবং প্রতিদিন ৪.৫% থেকে ১৫% পর্যন্ত মুনাফা তুলুন।</p>
+                            </div>
+                        </div>
+                        <div class="info-card">
+                            <div class="info-icon"><i class="fa-solid fa-diagram-project"></i></div>
+                            <div class="info-content">
+                                <h3>৩. টিম রেফারেল কমিশন</h3>
+                                <p>আপনার নিজস্ব ইনভাইট লিংক শেয়ার করুন এবং ৩ লেভেল পর্যন্ত আকর্ষণীয় লাইফটাইম কমিশন লাভ করুন।</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SCREEN 2: NFT LEVEL (VIP) -->
+            <div id="screen-level" class="screen-view">
+                <div class="page-content">
+                    <div class="section-header" style="justify-content: center; position: relative;">
+                        <h2 style="font-size: 18px; color: #fff;">NFT Level VIP</h2>
+                        <i class="fa-solid fa-file-invoice" onclick="alert('NFT Level Rules:\nভিআইপি আপগ্রেড করলে দৈনিক রিটার্ন স্বয়ংক্রিয়ভাবে বৃদ্ধি পাবে। প্রয়োজনীয় TRX একাউন্টে রেখে কার্ড আনলক করুন।')" style="position: absolute; right: 0; color: #a0a5b5; cursor: pointer;"></i>
+                    </div>
+
+                    <!-- Balances summary -->
+                    <div class="status-info-section">
+                        <div class="level-status-grid">
+                            <div class="status-item">
+                                <span>মোট ব্যালেন্স</span>
+                                <span id="level-total-funds">0.00 TRX</span>
+                            </div>
+                            <div class="status-item">
+                                <span>লকড অ্যামাউন্ট</span>
+                                <span id="level-frozen-funds">0.00 TRX</span>
+                            </div>
+                            <div class="status-item">
+                                <span>আজকের ইনকাম</span>
+                                <span id="level-today-earn">0.0000</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Level VIP Cards -->
+                    <div class="level-cards-container">
+                        <!-- Card Shop -->
+                        <div class="level-card" onclick="openNFTUpgradeModal('Card Shop (Free Starter)', 0, 'দৈনিক আয়: 1.00 TRX')">
+                            <div class="card-left">
+                                <div class="level-icon-wrapper">
+                                    <img src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=200&q=80" alt="Shop">
+                                </div>
+                                <div>
+                                    <h3 class="level-title">Card Shop</h3>
+                                    <span class="trx-info">ফ্রি ট্রায়াল টিয়ার >></span>
+                                </div>
+                            </div>
+                            <div class="card-right">
+                                <div class="medal-icon"><i class="fa-solid fa-award"></i></div>
+                                <i class="fa-solid fa-chevron-right" style="color: #64748b; font-size: 11px;"></i>
+                            </div>
+                        </div>
+
+                        <!-- Level 2 -->
+                        <div class="level-card" onclick="openNFTUpgradeModal('Level 2 VIP Silver', 30, 'দৈনিক আয়: 4.5% - 6.0%')">
+                            <div class="card-left">
+                                <div class="level-icon-wrapper">
+                                    <img src="https://cdn-icons-png.flaticon.com/512/3069/3069201.png" alt="Level 2">
+                                </div>
+                                <div>
+                                    <h3 class="level-title">Level 2 VIP</h3>
+                                    <span class="trx-info">প্রয়োজন: 30.00 TRX</span>
+                                </div>
+                            </div>
+                            <div class="card-right">
+                                <div class="medal-icon"><i class="fa-solid fa-medal" style="color:#c0c0c0;"></i></div>
+                                <i class="fa-solid fa-chevron-right" style="color: #64748b; font-size: 11px;"></i>
+                            </div>
+                        </div>
+
+                        <!-- Level 3 -->
+                        <div class="level-card" onclick="openNFTUpgradeModal('Level 3 VIP Gold Ape', 500, 'দৈনিক আয়: 7.0% - 9.0%')">
+                            <div class="card-left">
+                                <div class="level-icon-wrapper">
+                                    <img src="https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=200&q=80" alt="Level 3">
+                                </div>
+                                <div>
+                                    <h3 class="level-title">Level 3 VIP</h3>
+                                    <span class="trx-info">প্রয়োজন: 500.00 TRX</span>
+                                </div>
+                            </div>
+                            <div class="card-right">
+                                <div class="medal-icon"><i class="fa-solid fa-crown" style="color:#ffd700;"></i></div>
+                                <i class="fa-solid fa-chevron-right" style="color: #64748b; font-size: 11px;"></i>
+                            </div>
+                        </div>
+
+                        <!-- Level 4 -->
+                        <div class="level-card" onclick="openNFTUpgradeModal('Level 4 Cyberpunk Diamond', 5000, 'দৈনিক আয়: 11.5% - 15.0%')">
+                            <div class="card-left">
+                                <div class="level-icon-wrapper">
+                                    <img src="https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?w=200&q=80" alt="Level 4">
+                                </div>
+                                <div>
+                                    <h3 class="level-title">Level 4 VIP</h3>
+                                    <span class="trx-info">প্রয়োজন: 5000.00 TRX</span>
+                                </div>
+                            </div>
+                            <div class="card-right">
+                                <div class="medal-icon"><i class="fa-solid fa-gem" style="color:#38bdf8;"></i></div>
+                                <i class="fa-solid fa-chevron-right" style="color: #64748b; font-size: 11px;"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SCREEN 3: WALLET MANAGEMENT -->
+            <div id="screen-wallet" class="screen-view">
+                <div class="page-content">
+                    <div class="section-header">
+                        <h2><i class="fa-solid fa-wallet"></i> মাই ওয়ালেট ও অ্যাসেট</h2>
+                    </div>
+
+                    <div class="profile-card" style="text-align: center; padding: 22px 14px;">
+                        <span style="font-size: 12px; color: var(--text-muted);">মোট সংরক্ষিত ব্যালেন্স</span>
+                        <h2 style="font-size: 32px; color: #ffd700; margin: 8px 0;" id="wallet-balance-big">0.00 TRX</h2>
+                        <span style="font-size: 11px; color: #22c55e;"><i class="fa-solid fa-shield-halved"></i> TRC20 / স্মার্ট কন্ট্রাক্ট সুরক্ষিত</span>
+                    </div>
+
+                    <div class="action-buttons">
+                        <button class="btn-action btn-deposit" onclick="openModal('recharge-modal')">
+                            <i class="fa-solid fa-plus-circle"></i> দ্রুত রিচার্জ
+                        </button>
+                        <button class="btn-action btn-withdraw" onclick="openModal('withdraw-modal')">
+                            <i class="fa-solid fa-money-bill-transfer"></i> টাকা উত্তোলন
+                        </button>
+                    </div>
+
+                    <div class="section-header">
+                        <h2><i class="fa-solid fa-clock-rotate-left"></i> ট্রানজ্যাকশন হিস্ট্রি</h2>
+                    </div>
+                    <div id="tx-history-list" style="display: flex; flex-direction: column; gap: 8px;">
+                        <!-- Dynamic Transaction Items will be rendered here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- SCREEN 4: USER PROFILE -->
+            <div id="screen-profile" class="screen-view">
+                <div class="top-earnings-bar">
+                    <span>আজকের আয়:</span>
+                    <span id="profile-today-bar">0.0000 TRX</span>
+                </div>
+
+                <div class="page-content">
+                    <div class="user-greeting">
+                        <span id="profile-username">Siam009</span>
+                        <span class="admin-badge" id="admin-badge-indicator" style="display:none; cursor:pointer;" onclick="navigateTo('screen-admin')">ADMIN ACCESS</span>
+                    </div>
+
+                    <!-- Profile Card -->
+                    <div class="profile-card">
+                        <div class="profile-row">
+                            <span class="p-label">কারেন্ট লেভেল</span>
+                            <span class="p-value" id="profile-level-badge" style="color:#ffd700; font-weight:800;">VIP 0</span>
+                        </div>
+                        <div class="profile-row">
+                            <span class="p-label">পজিশন</span>
+                            <span class="p-value">SNAI MEMBER</span>
+                        </div>
+                        <div class="profile-row">
+                            <span class="p-label">অ্যাকাউন্ট আইডি</span>
+                            <span class="p-value" id="profile-account-id">1654</span>
+                        </div>
+                        <div class="profile-row">
+                            <span class="p-label">মোট ফান্ড</span>
+                            <span class="p-value" id="profile-total-funds">0.00 TRX</span>
+                        </div>
+                        <div class="profile-row">
+                            <span class="p-label">উত্তোলনযোগ্য ব্যালেন্স</span>
+                            <span class="p-value" id="profile-avail-funds">0.00 TRX</span>
+                        </div>
+                    </div>
+
+                    <!-- Fast Action Buttons -->
+                    <div class="action-buttons">
+                        <button class="btn-action btn-recharge-green" onclick="openModal('recharge-modal')">
+                            <i class="fa-solid fa-wallet"></i> রিচার্জ
+                        </button>
+                        <button class="btn-action btn-withdraw-pink" onclick="openModal('withdraw-modal')">
+                            <i class="fa-solid fa-arrow-up-from-bracket"></i> উত্তোলন
+                        </button>
+                    </div>
+
+                    <!-- Revenues Grid -->
+                    <div class="revenue-grid">
+                        <div class="revenue-box">
+                            <div class="rev-label">মোট রিভিনিউ</div>
+                            <div class="rev-value" id="profile-tot-rev">0.00 TRX</div>
+                        </div>
+                        <div class="revenue-box">
+                            <div class="rev-label">ইনভাইটেশন কমিশন</div>
+                            <div class="rev-value" id="profile-invite-rev">0.00 TRX</div>
+                        </div>
+                        <div class="revenue-box full-width">
+                            <div class="rev-label">আজকের মোট আর্নিং</div>
+                            <div class="rev-value" id="profile-today-box">0.0000 TRX</div>
+                        </div>
+                    </div>
+
+                    <div class="nft-earning-banner">
+                        ৫টি এআই এনএফটি বোট সক্রিয়ভাবে উপার্জন করছে
+                    </div>
+
+                    <!-- 5 NFTs Mini Carousel -->
+                    <div class="nft-preview-scroll">
+                        <div class="nft-mini-card"><img src="https://images.unsplash.com/photo-1620641788421-7a1c342ea42e?w=200&q=80" alt="NFT 1"></div>
+                        <div class="nft-mini-card"><img src="https://images.unsplash.com/photo-1634973357973-f2ed2657db3c?w=200&q=80" alt="NFT 2"></div>
+                        <div class="nft-mini-card"><img src="https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=200&q=80" alt="NFT 3"></div>
+                        <div class="nft-mini-card"><img src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=200&q=80" alt="NFT 4"></div>
+                        <div class="nft-mini-card"><img src="https://images.unsplash.com/photo-1546776310-eef45dd6d63c?w=200&q=80" alt="NFT 5"></div>
+                    </div>
+
+                    <!-- Settings Menu -->
+                    <div class="menu-list">
+                        <div class="menu-item" onclick="claimDailyReward()">
+                            <div class="menu-left"><i class="fa-solid fa-calendar-days"></i><span>দৈনিক সাইন-ইন রিওয়ার্ড</span></div>
+                            <i class="fa-solid fa-chevron-right"></i>
+                        </div>
+                        <div class="menu-item" onclick="openShareModal()">
+                            <div class="menu-left"><i class="fa-solid fa-share-nodes"></i><span>রেফারেল ও আমন্ত্রণ লিংক</span></div>
+                            <i class="fa-solid fa-chevron-right"></i>
+                        </div>
+                        <div class="menu-item" onclick="openModal('wallet-bind-modal')">
+                            <div class="menu-left"><i class="fa-solid fa-link"></i><span>TRC20 ওয়ালেট সেটআপ</span></div>
+                            <i class="fa-solid fa-chevron-right"></i>
+                        </div>
+                        <div class="menu-item" onclick="openModal('pass-modal')">
+                            <div class="menu-left"><i class="fa-solid fa-lock"></i><span>পাসওয়ার্ড পরিবর্তন</span></div>
+                            <i class="fa-solid fa-chevron-right"></i>
+                        </div>
+                        <div class="menu-item" onclick="openModal('pin-modal')">
+                            <div class="menu-left"><i class="fa-solid fa-key"></i><span>পেমেন্ট পিন পরিবর্তন</span></div>
+                            <i class="fa-solid fa-chevron-right"></i>
+                        </div>
+                        <div class="menu-item" onclick="requestAdminEntry()">
+                            <div class="menu-left"><i class="fa-solid fa-shield-halved" style="color:#ffd700;"></i><span>অ্যাডমিন কন্ট্রোল রুম</span></div>
+                            <i class="fa-solid fa-chevron-right"></i>
+                        </div>
+                        <div class="menu-item" style="color: #ef4444;" onclick="handleLogout()">
+                            <div class="menu-left" style="color: #ef4444;"><i class="fa-solid fa-right-from-bracket" style="color: #ef4444;"></i><span>লগআউট করুন</span></div>
+                            <i class="fa-solid fa-chevron-right"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SCREEN 5: SECRET ADMIN PANEL -->
+            <div id="screen-admin" class="screen-view">
+                <div class="page-content">
+                    <div class="section-header">
+                        <h2><i class="fa-solid fa-user-gear"></i> System Control Panel</h2>
+                        <span class="admin-badge">ADMIN MODE</span>
+                    </div>
+
+                    <!-- Pending Deposits -->
+                    <div class="admin-card">
+                        <h3>পেন্ডিং ডিপোজিট তালিকা <span id="admin-pending-dep-count" style="color:#22c55e;">(0)</span></h3>
+                        <div id="admin-deposit-list">কোন ডিপোজিট পেন্ডিং নেই।</div>
+                    </div>
+
+                    <!-- Pending Withdrawals -->
+                    <div class="admin-card">
+                        <h3>পেন্ডিং উত্তোলন তালিকা <span id="admin-pending-with-count" style="color:#ef4444;">(0)</span></h3>
+                        <div id="admin-withdraw-list">কোন উত্তোলন পেন্ডিং নেই।</div>
+                    </div>
+
+                    <!-- All Registered Users -->
+                    <div class="admin-card">
+                        <h3>নিবন্ধিত ইউজারগণ (<span id="admin-total-users-count">0</span>)</h3>
+                        <div id="admin-users-list"></div>
+                    </div>
+
+                    <div style="display:flex; gap:10px;">
+                        <button class="submit-btn" style="background:#3b82f6; color:#fff;" onclick="quickAdminAddBonus()">ইউজারকে ৫০ TRX বোনাস দিন</button>
+                        <button class="submit-btn" style="background:#ef4444; color:#fff;" onclick="navigateTo('screen-home')">Exit Panel</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Floating Help Chat Button -->
+            <button class="floating-chat-btn" onclick="openModal('chat-modal')">
+                <i class="fa-solid fa-headset"></i>
+            </button>
+
+            <!-- Bottom Navigation Bar -->
+            <div class="bottom-nav">
+                <div class="nav-item active" id="nav-btn-home" onclick="navigateTo('screen-home')">
+                    <i class="fa-solid fa-house"></i>
+                    <span>হোম</span>
+                </div>
+                <div class="nav-item" id="nav-btn-level" onclick="navigateTo('screen-level')">
+                    <i class="fa-solid fa-layer-group"></i>
+                    <span>ভিআইপি লেভেল</span>
+                </div>
+                <div class="nav-item" id="nav-btn-wallet" onclick="navigateTo('screen-wallet')">
+                    <i class="fa-solid fa-wallet"></i>
+                    <span>ওয়ালেট</span>
+                </div>
+                <div class="nav-item" id="nav-btn-profile" onclick="navigateTo('screen-profile')">
+                    <i class="fa-solid fa-user"></i>
+                    <span>প্রোফাইল</span>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- ==============================================
+         GLOBAL MODALS & POPUPS
+    ============================================== -->
+    <!-- 1. Recharge Modal -->
+    <div id="recharge-modal" class="modal-overlay">
+        <div class="modal-box">
+            <i class="fa-solid fa-xmark modal-close" onclick="closeModal('recharge-modal')"></i>
+            <h3 class="modal-title"><i class="fa-solid fa-qrcode"></i> রিচার্জ TRX / USDT</h3>
+            <p style="font-size: 11px; color: #a0a5b5; margin-bottom: 8px;">নিচের অফিসিয়াল ডিপোজিট অ্যাড্রেসে TRX পাঠাতে হবে:</p>
+            
+            <div style="background: #090c16; padding: 10px; border-radius: 8px; margin-bottom: 12px; word-break: break-all; font-size: 11px; border: 1px dashed #ffd700; display:flex; justify-content:space-between; align-items:center;">
+                <code id="official-wallet">TYD5qZ39W9r7pB3q11kGSmq8uRtxLpSmartNFT</code>
+                <i class="fa-regular fa-copy" style="cursor:pointer; color:#ffd700; margin-left:6px;" onclick="copyText('TYD5qZ39W9r7pB3q11kGSmq8uRtxLpSmartNFT', 'অফিসিয়াল ওয়ালেট কপি হয়েছে!')"></i>
+            </div>
+
+            <div class="form-group">
+                <label>রিচার্জের পরিমাণ (TRX)</label>
+                <input type="number" id="deposit-amount-input" class="form-control" placeholder="সর্বনিম্ন ৩০ TRX" style="padding-left: 12px;">
+            </div>
+
+            <div class="form-group">
+                <label>ট্রানজ্যাকশন হ্যাশ / TXID</label>
+                <input type="text" id="deposit-txid-input" class="form-control" placeholder="যেমন: a1b2c3d4e5f6..." style="padding-left: 12px;">
+            </div>
+
+            <button class="submit-btn" onclick="submitDepositRequest()">রিচার্জ রিকোয়েস্ট পাঠান</button>
+        </div>
+    </div>
+
+    <!-- 2. Withdraw Modal -->
+    <div id="withdraw-modal" class="modal-overlay">
+        <div class="modal-box">
+            <i class="fa-solid fa-xmark modal-close" onclick="closeModal('withdraw-modal')"></i>
+            <h3 class="modal-title"><i class="fa-solid fa-money-bill-transfer"></i> টাকা উত্তোলন (উইথড্র)</h3>
+            
+            <div class="form-group">
+                <label>উত্তোলন মেথড নির্বাচন করুন</label>
+                <select id="withdraw-method" class="form-control" style="padding-left:12px;">
+                    <option value="TRX-TRC20">TRX (TRC20 Address)</option>
+                    <option value="Bkash">বিকাশ (Personal)</option>
+                    <option value="Nagad">নগদ (Personal)</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>ওয়ালেট অ্যাড্রেস অথবা বিকাশ/নগদ নাম্বার</label>
+                <input type="text" id="withdraw-address-input" class="form-control" placeholder="নাম্বার বা ওয়ালেট অ্যাড্রেস লিখুন" style="padding-left: 12px;" required>
+            </div>
+
+            <div class="form-group">
+                <label>উত্তোলনের পরিমাণ (TRX)</label>
+                <input type="number" id="withdraw-amount-input" class="form-control" placeholder="সর্বনিম্ন ২০ TRX" style="padding-left: 12px;" required>
+            </div>
+
+            <div class="form-group">
+                <label>৬ ডিজিটের পেমেন্ট পিন</label>
+                <input type="password" maxlength="6" id="withdraw-pin-input" class="form-control" placeholder="পিন কোড লিখুন" style="padding-left: 12px;" required>
+            </div>
+
+            <button class="submit-btn" onclick="submitWithdrawRequest()">উত্তোলন কনফার্ম করুন</button>
+        </div>
+    </div>
+
+    <!-- 3. Share Referral Modal -->
+    <div id="share-modal" class="modal-overlay">
+        <div class="modal-box">
+            <i class="fa-solid fa-xmark modal-close" onclick="closeModal('share-modal')"></i>
+            <h3 class="modal-title"><i class="fa-solid fa-share-nodes"></i> ইনভাইট ও রেফারেল বোনাস</h3>
+            <p style="font-size: 12px; color: #a0a5b5; margin-bottom: 12px;">আপনার রেফারেল লিংক বন্ধুদের সাথে শেয়ার করে সর্বোচ্চ ১৫% পর্যন্ত কমিশন আয় করুন:</p>
+
+            <div style="background: #090c16; padding: 12px; border-radius: 8px; margin-bottom: 14px; font-size: 11px; color: #ffd700; word-break: break-all;">
+                <span id="ref-link-text">https://earn-matrix.io/reg?ref=1654</span>
+            </div>
+
+            <button class="submit-btn" onclick="copyRefLink()"><i class="fa-regular fa-copy"></i> কপি রেফারেল লিংক</button>
+        </div>
+    </div>
+
+    <!-- 4. Customer Support Chat Modal -->
+    <div id="chat-modal" class="modal-overlay">
+        <div class="modal-box">
+            <i class="fa-solid fa-xmark modal-close" onclick="closeModal('chat-modal')"></i>
+            <h3 class="modal-title"><i class="fa-solid fa-headset"></i> ২৪/৭ লাইভ সাপোর্ট</h3>
+            <div style="background: #0a0d18; border-radius: 10px; padding: 12px; height: 180px; overflow-y: auto; font-size: 12px; margin-bottom: 12px;" id="chat-logs">
+                <p style="color: #ffd700; margin-bottom: 8px;"><strong>স্মার্ট বট:</strong> স্বাগতম! আর্ন ম্যাট্রিক্স সাপোর্ট টিমে আপনাকে স্বাগতম। আপনার যেকোনো প্রশ্নের উত্তর দিতে আমরা প্রস্তুত।</p>
+            </div>
+            <div style="display: flex; gap: 8px;">
+                <input type="text" id="chat-input" class="form-control" placeholder="আপনার বার্তা লিখুন..." style="padding-left: 10px;" onkeydown="if(event.key==='Enter') sendChatMessage()">
+                <button class="submit-btn" style="width: auto; margin-top: 0; padding: 0 16px;" onclick="sendChatMessage()">Send</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 5. Change Password Modal -->
+    <div id="pass-modal" class="modal-overlay">
+        <div class="modal-box">
+            <i class="fa-solid fa-xmark modal-close" onclick="closeModal('pass-modal')"></i>
+            <h3 class="modal-title"><i class="fa-solid fa-lock"></i> পাসওয়ার্ড পরিবর্তন</h3>
+            <div class="form-group">
+                <label>বর্তমান পাসওয়ার্ড</label>
+                <input type="password" id="old-pass" class="form-control" placeholder="বর্তমান পাসওয়ার্ড" style="padding-left:12px;">
+            </div>
+            <div class="form-group">
+                <label>নতুন পাসওয়ার্ড</label>
+                <input type="password" id="new-pass" class="form-control" placeholder="নতুন পাসওয়ার্ড (কমপক্ষে ৬ ডিজিট)" style="padding-left:12px;">
+            </div>
+            <button class="submit-btn" onclick="changeUserPassword()">পাসওয়ার্ড আপডেট করুন</button>
+        </div>
+    </div>
+
+    <!-- 6. Change Payment PIN Modal -->
+    <div id="pin-modal" class="modal-overlay">
+        <div class="modal-box">
+            <i class="fa-solid fa-xmark modal-close" onclick="closeModal('pin-modal')"></i>
+            <h3 class="modal-title"><i class="fa-solid fa-key"></i> পেমেন্ট পিন পরিবর্তন</h3>
+            <div class="form-group">
+                <label>বর্তমান পিন</label>
+                <input type="password" maxlength="6" id="old-pin" class="form-control" placeholder="৬ ডিজিটের বর্তমান পিন" style="padding-left:12px;">
+            </div>
+            <div class="form-group">
+                <label>নতুন পিন</label>
+                <input type="password" maxlength="6" id="new-pin" class="form-control" placeholder="নতুন ৬ ডিজিটের পিন" style="padding-left:12px;">
+            </div>
+            <button class="submit-btn" onclick="changeUserPin()">পিন আপডেট করুন</button>
+        </div>
+    </div>
+
+    <!-- 7. Bind TRC20 Wallet Modal -->
+    <div id="wallet-bind-modal" class="modal-overlay">
+        <div class="modal-box">
+            <i class="fa-solid fa-xmark modal-close" onclick="closeModal('wallet-bind-modal')"></i>
+            <h3 class="modal-title"><i class="fa-solid fa-link"></i> TRC20 ওয়ালেট বাইন্ডিং</h3>
+            <div class="form-group">
+                <label>আপনার পার্সোনাল TRC20 ওয়ালেট অ্যাড্রেস</label>
+                <input type="text" id="bind-trc-address" class="form-control" placeholder="T..." style="padding-left:12px;">
+            </div>
+            <button class="submit-btn" onclick="saveBoundWallet()">ওয়ালেট সংরক্ষণ করুন</button>
+        </div>
+    </div>
+
+    <!-- 8. NFT Upgrade Modal -->
+    <div id="nft-upgrade-modal" class="modal-overlay">
+        <div class="modal-box">
+            <i class="fa-solid fa-xmark modal-close" onclick="closeModal('nft-upgrade-modal')"></i>
+            <h3 class="modal-title" id="upgrade-modal-title"><i class="fa-solid fa-crown"></i> ভিআইপি অ্যাক্টিভেশন</h3>
+            <p id="upgrade-modal-desc" style="font-size: 12px; color: #a0a5b5; margin-bottom: 12px;"></p>
+            <div style="background:#090c16; padding:10px; border-radius:8px; margin-bottom:14px; border:1px solid #29304d;">
+                <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:4px;">
+                    <span>প্রয়োজনীয় ফি:</span>
+                    <span id="upgrade-modal-cost" style="color:#ffd700; font-weight:700;">30.00 TRX</span>
+                </div>
+                <div style="display:flex; justify-content:space-between; font-size:12px;">
+                    <span>আপনার বর্তমান ব্যালেন্স:</span>
+                    <span id="upgrade-modal-userbal" style="color:#38bdf8; font-weight:700;">0.00 TRX</span>
+                </div>
+            </div>
+            <button class="submit-btn" id="upgrade-confirm-btn" onclick="executeNFTUpgrade()">লেভেল সক্রিয় করুন</button>
+        </div>
+    </div>
+
+    <!-- ==============================================
+         CORE JAVASCRIPT APPLICATION LOGIC
+    ============================================== -->
+    <script>
+        // Database State
+        const STORAGE_KEY = 'EARN_MATRIX_DATA_V2';
+
+        let appData = {
+            currentUser: {
+                username: 'Siam009',
+                phone: '01712345678',
+                pass: '123456',
+                pin: '123456',
+                accountId: '1654',
+                balance: 100.00,
+                frozen: 0.00,
+                todayEarn: 0.0000,
+                totalRev: 0.00,
+                inviteRev: 0.00,
+                level: 'VIP 0',
+                walletAddress: '',
+                hasClaimedDaily: false
+            },
+            registeredUsers: [
+                { username: 'Siam009', phone: '01712345678', balance: 100.00, level: 'VIP 0' },
+                { username: 'Tanvir_Pro', phone: '01811223344', balance: 520.00, level: 'VIP 3' },
+                { username: 'crypto_boss', phone: '01999887766', balance: 1450.00, level: 'VIP 3' }
+            ],
+            transactions: [
+                { id: 'TX-101', user: 'Siam009', type: 'Deposit', amount: 100.00, date: '2025-02-15 11:20', status: 'Approved', note: 'Initial Registration Bonus' }
+            ],
+            pendingDeposits: [],
+            pendingWithdrawals: []
+        };
+
+        // Load persisted state if exists
+        function loadState() {
+            const saved = localStorage.getItem(STORAGE_KEY);
+            if (saved) {
+                try {
+                    appData = JSON.parse(saved);
+                } catch(e) { console.error('Failed to parse storage', e); }
+            }
+        }
+
+        // Save state
+        function saveState() {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(appData));
+        }
+
+        // Language toggle
+        function toggleLanguage(lang) {
+            alert(lang === 'bn' ? 'ভাষা বাংলায় পরিবর্তিত হয়েছে।' : 'Language changed to English.');
+        }
+
+        // Secret Admin trigger
+        let logoClickCount = 0;
+        function triggerAdminSecret() {
+            logoClickCount++;
+            if (logoClickCount >= 3) {
+                logoClickCount = 0;
+                requestAdminEntry();
+            }
+        }
+
+        function requestAdminEntry() {
+            const pass = prompt('অ্যাডমিন কন্ট্রোল রুমের সিক্রেট পাসওয়ার্ড দিন: (Default: admin123)');
+            if (pass === 'admin123') {
+                document.getElementById('admin-badge-indicator').style.display = 'inline-block';
+                renderAdminPanel();
+                navigateTo('screen-admin');
+            } else if (pass !== null) {
+                alert('ভুল পাসওয়ার্ড! প্রবেশাধিকার সংরক্ষিত।');
+            }
+        }
+
+        // Switch Tabs between Login and Register
+        function switchAuthTab(type) {
+            const btnLogin = document.getElementById('btn-login-tab');
+            const btnReg = document.getElementById('btn-reg-tab');
+            const formLogin = document.getElementById('form-login');
+            const formReg = document.getElementById('form-register');
+
+            if (type === 'login') {
+                btnLogin.classList.add('active');
+                btnReg.classList.remove('active');
+                formLogin.classList.add('active-form');
+                formReg.classList.remove('active-form');
+            } else {
+                btnReg.classList.add('active');
+                btnLogin.classList.remove('active');
+                formReg.classList.add('active-form');
+                formLogin.classList.remove('active-form');
+            }
+        }
+
+        // Handle Authentication
+        function handleAuthSubmit(event, action) {
+            event.preventDefault();
+
+            if (action === 'register') {
+                const name = document.getElementById('reg-name').value.trim();
+                const phone = document.getElementById('reg-phone').value.trim();
+                const pass = document.getElementById('reg-pass').value;
+                const pin = document.getElementById('reg-pin').value;
+
+                if (pass.length < 6 || pin.length < 6) {
+                    alert('পাসওয়ার্ড এবং পিন অবশ্যই ৬ ডিজিট হতে হবে!');
+                    return;
+                }
+
+                const newAccId = Math.floor(1000 + Math.random() * 9000).toString();
+                appData.currentUser = {
+                    username: name,
+                    phone: phone,
+                    pass: pass,
+                    pin: pin,
+                    accountId: newAccId,
+                    balance: 10.00, // Welcome Gift
+                    frozen: 0.00,
+                    todayEarn: 0.0000,
+                    totalRev: 10.00,
+                    inviteRev: 0.00,
+                    level: 'VIP 0',
+                    walletAddress: '',
+                    hasClaimedDaily: false
+                };
+
+                appData.registeredUsers.push({
+                    username: name,
+                    phone: phone,
+                    balance: 10.00,
+                    level: 'VIP 0'
+                });
+
+                appData.transactions.unshift({
+                    id: 'TX-' + Math.floor(1000 + Math.random() * 9000),
+                    user: name,
+                    type: 'Sign-up Bonus',
+                    amount: 10.00,
+                    date: new Date().toLocaleTimeString(),
+                    status: 'Approved',
+                    note: 'রেজিস্ট্রেশন ওয়েলকাম বোনাস'
+                });
+
+                alert('🎉 অভিনন্দন! রেজিস্ট্রেশন সফল হয়েছে। ১০ TRX ফ্রি ট্রায়াল বোনাস দেওয়া হয়েছে!');
+            } else {
+                const phoneInput = document.getElementById('login-account').value.trim();
+                const passInput = document.getElementById('login-pass').value;
+
+                if (phoneInput === 'admin' && passInput === 'admin123') {
+                    requestAdminEntry();
+                    return;
+                }
+
+                // Check stored user
+                if (appData.currentUser.phone === phoneInput && appData.currentUser.pass !== passInput) {
+                    alert('পাসওয়ার্ড সঠিক নয়!');
+                    return;
+                }
+            }
+
+            saveState();
+            syncUI();
+
+            // Transition from Auth Screen to Dashboard
+            document.getElementById('screen-auth').style.display = 'none';
+            document.getElementById('main-app-container').style.display = 'block';
+            navigateTo('screen-home');
+        }
+
+        // Navigation Engine
+        function navigateTo(screenId) {
+            const views = document.querySelectorAll('#main-app-container .screen-view');
+            views.forEach(v => v.classList.remove('active-screen'));
+
+            const targetView = document.getElementById(screenId);
+            if (targetView) targetView.classList.add('active-screen');
+
+            // Update bottom nav
+            const navItems = document.querySelectorAll('.bottom-nav .nav-item');
+            navItems.forEach(item => item.classList.remove('active'));
+
+            if (screenId === 'screen-home') document.getElementById('nav-btn-home').classList.add('active');
+            if (screenId === 'screen-level') document.getElementById('nav-btn-level').classList.add('active');
+            if (screenId === 'screen-wallet') document.getElementById('nav-btn-wallet').classList.add('active');
+            if (screenId === 'screen-profile') document.getElementById('nav-btn-profile').classList.add('active');
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Sync and Render Data on Dashboard
+        function syncUI() {
+            const u = appData.currentUser;
+            const formattedBal = u.balance.toFixed(2) + ' TRX';
+
+            document.getElementById('nav-balance').textContent = formattedBal;
+            document.getElementById('wallet-balance-big').textContent = formattedBal;
+            document.getElementById('level-total-funds').textContent = formattedBal;
+            document.getElementById('level-frozen-funds').textContent = u.frozen.toFixed(2) + ' TRX';
+            document.getElementById('level-today-earn').textContent = u.todayEarn.toFixed(4);
+
+            document.getElementById('profile-username').textContent = u.username;
+            document.getElementById('profile-account-id').textContent = u.accountId;
+            document.getElementById('profile-total-funds').textContent = formattedBal;
+            document.getElementById('profile-avail-funds').textContent = formattedBal;
+            document.getElementById('profile-level-badge').textContent = u.level;
+
+            document.getElementById('profile-today-bar').textContent = u.todayEarn.toFixed(4) + ' TRX';
+            document.getElementById('profile-today-box').textContent = u.todayEarn.toFixed(4) + ' TRX';
+            document.getElementById('profile-tot-rev').textContent = u.totalRev.toFixed(2) + ' TRX';
+            document.getElementById('profile-invite-rev').textContent = u.inviteRev.toFixed(2) + ' TRX';
+
+            document.getElementById('ref-link-text').textContent = `https://earn-matrix.io/reg?ref=${u.accountId}`;
+            document.getElementById('stats-users').textContent = 1650 + appData.registeredUsers.length;
+
+            renderTransactions();
+            renderAdminPanel();
+        }
+
+        // Render User Transactions
+        function renderTransactions() {
+            const list = document.getElementById('tx-history-list');
+            if (!appData.transactions || appData.transactions.length === 0) {
+                list.innerHTML = `<div style="background:#141828; padding:15px; border-radius:12px; color:#a0a5b5; text-align:center; font-size:12px;">এখনও কোনো ট্রানজ্যাকশন নেই।</div>`;
+                return;
+            }
+
+            list.innerHTML = appData.transactions.map(t => `
+                <div style="background:#141828; border:1px solid #232a40; border-radius:12px; padding:12px 14px; display:flex; justify-content:space-between; align-items:center;">
+                    <div>
+                        <div style="font-size:13px; fo

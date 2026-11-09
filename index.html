@@ -1691,4 +1691,435 @@
             list.innerHTML = appData.transactions.map(t => `
                 <div style="background:#141828; border:1px solid #232a40; border-radius:12px; padding:12px 14px; display:flex; justify-content:space-between; align-items:center;">
                     <div>
-                        <div style="font-size:13px; fo
+                        <div style="font-size:13px; font-weight:700; color:#fff;">${t.type}</div>
+                        <div style="font-size:10px; color:#a0a5b5; margin-top:2px;">${t.date} | ID: ${t.id}</div>
+                    </div>
+                    <div style="text-align:right;">
+                        <div style="font-size:13px; font-weight:800; color:${t.amount > 0 ? '#22c55e' : '#ef4444'};">
+                            ${t.amount > 0 ? '+' : ''}${t.amount.toFixed(2)} TRX
+                        </div>
+                        <span class="tx-badge ${t.status}">${t.status}</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Modal Controls
+        function openModal(id) {
+            document.getElementById(id).classList.add('active-modal');
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).classList.remove('active-modal');
+        }
+
+        // Copy Utility
+        function copyText(txt, msg) {
+            navigator.clipboard.writeText(txt).then(() => {
+                alert(msg || 'কপি সম্পন্ন হয়েছে!');
+            });
+        }
+
+        function copyRefLink() {
+            const link = document.getElementById('ref-link-text').textContent;
+            copyText(link, 'আপনার রেফারেল লিংক ক্লিপবোর্ডে কপি হয়েছে!\n' + link);
+        }
+
+        // 1. Submit Recharge / Deposit
+        function submitDepositRequest() {
+            const amt = parseFloat(document.getElementById('deposit-amount-input').value);
+            const txid = document.getElementById('deposit-txid-input').value.trim();
+
+            if (!amt || amt < 30) {
+                alert('অনুগ্রহ করে নূন্যতম ৩০ TRX ডিপোজিট অ্যামাউন্ট লিখুন!');
+                return;
+            }
+            if (!txid) {
+                alert('ট্রানজ্যাকশন হ্যাশ বা TXID দেওয়া বাধ্যতামূলক!');
+                return;
+            }
+
+            const depObj = {
+                id: 'DEP-' + Math.floor(10000 + Math.random() * 90000),
+                user: appData.currentUser.username,
+                amount: amt,
+                txid: txid,
+                date: new Date().toLocaleTimeString(),
+                status: 'Pending'
+            };
+
+            appData.pendingDeposits.push(depObj);
+            appData.transactions.unshift({
+                id: depObj.id,
+                user: appData.currentUser.username,
+                type: 'Recharge TRX',
+                amount: amt,
+                date: depObj.date,
+                status: 'Pending',
+                note: `TXID: ${txid}`
+            });
+
+            saveState();
+            syncUI();
+            closeModal('recharge-modal');
+            document.getElementById('deposit-amount-input').value = '';
+            document.getElementById('deposit-txid-input').value = '';
+
+            alert('✅ আপনার ডিপোজিট রিকোয়েস্টটি সাবমিট হয়েছে!\nএডমিন অনুমোদন করার সাথে সাথে ব্যালেন্সে যোগ হবে। (অ্যাডমিন প্যানেল চেক করতে পারেন)');
+        }
+
+        // 2. Submit Withdrawal
+        function submitWithdrawRequest() {
+            const method = document.getElementById('withdraw-method').value;
+            const address = document.getElementById('withdraw-address-input').value.trim();
+            const amt = parseFloat(document.getElementById('withdraw-amount-input').value);
+            const pin = document.getElementById('withdraw-pin-input').value.trim();
+
+            if (!address) {
+                alert('উত্তোলনের জন্য নাম্বার বা অ্যাড্রেস দিন!');
+                return;
+            }
+            if (!amt || amt < 20) {
+                alert('সর্বনিম্ন উত্তোলনের সীমা ২০ TRX!');
+                return;
+            }
+            if (amt > appData.currentUser.balance) {
+                alert('আপনার পর্যাপ্ত ব্যালেন্স নেই!');
+                return;
+            }
+            if (pin !== appData.currentUser.pin) {
+                alert('পেমেন্ট সিকিউরিটি পিন ভুল হয়েছে!');
+                return;
+            }
+
+            // Lock the amount
+            appData.currentUser.balance -= amt;
+
+            const withObj = {
+                id: 'WTH-' + Math.floor(10000 + Math.random() * 90000),
+                user: appData.currentUser.username,
+                amount: amt,
+                method: method,
+                address: address,
+                date: new Date().toLocaleTimeString(),
+                status: 'Pending'
+            };
+
+            appData.pendingWithdrawals.push(withObj);
+            appData.transactions.unshift({
+                id: withObj.id,
+                user: appData.currentUser.username,
+                type: `Withdraw (${method})`,
+                amount: -amt,
+                date: withObj.date,
+                status: 'Pending',
+                note: `Target: ${address}`
+            });
+
+            saveState();
+            syncUI();
+            closeModal('withdraw-modal');
+            document.getElementById('withdraw-amount-input').value = '';
+            document.getElementById('withdraw-pin-input').value = '';
+
+            alert('✅ উত্তোলনের আবেদন সফল হয়েছে! ভেরিফিকেশনের পর পেমেন্ট পাঠানো হবে।');
+        }
+
+        // 3. Daily Reward Claim
+        function claimDailyReward() {
+            if (appData.currentUser.hasClaimedDaily) {
+                alert('আপনি আজকের ডেইলি বোনাস ইতিমধ্যে ক্লেইম করেছেন! আগামীকাল আবার চেষ্টা করুন।');
+                return;
+            }
+            const reward = 5.00;
+            appData.currentUser.balance += reward;
+            appData.currentUser.todayEarn += reward;
+            appData.currentUser.totalRev += reward;
+            appData.currentUser.hasClaimedDaily = true;
+
+            appData.transactions.unshift({
+                id: 'BONUS-' + Math.floor(1000 + Math.random() * 9000),
+                user: appData.currentUser.username,
+                type: 'Daily Sign-in',
+                amount: reward,
+                date: new Date().toLocaleTimeString(),
+                status: 'Approved',
+                note: 'দৈনিক সাইন-ইন রিওয়ার্ড'
+            });
+
+            saveState();
+            syncUI();
+            alert('🎉 অভিনন্দন! 5.00 TRX আপনার ব্যালেন্সে যোগ হয়েছে!');
+        }
+
+        // 4. Change Password & PIN
+        function changeUserPassword() {
+            const oldP = document.getElementById('old-pass').value;
+            const newP = document.getElementById('new-pass').value;
+
+            if (oldP !== appData.currentUser.pass) {
+                alert('বর্তমান পাসওয়ার্ড ভুল!');
+                return;
+            }
+            if (newP.length < 6) {
+                alert('নতুন পাসওয়ার্ড কমপক্ষে ৬ ডিজিট হতে হবে!');
+                return;
+            }
+            appData.currentUser.pass = newP;
+            saveState();
+            closeModal('pass-modal');
+            alert('লগইন পাসওয়ার্ড সফলভাবে পরিবর্তিত হয়েছে!');
+        }
+
+        function changeUserPin() {
+            const oldPin = document.getElementById('old-pin').value;
+            const newPin = document.getElementById('new-pin').value;
+
+            if (oldPin !== appData.currentUser.pin) {
+                alert('বর্তমান পেমেন্ট পিন ভুল!');
+                return;
+            }
+            if (newPin.length !== 6) {
+                alert('পেমেন্ট পিন ঠিক ৬ ডিজিটের হতে হবে!');
+                return;
+            }
+            appData.currentUser.pin = newPin;
+            saveState();
+            closeModal('pin-modal');
+            alert('পেমেন্ট সিকিউরিটি পিন সফলভাবে আপডেট হয়েছে!');
+        }
+
+        // 5. TRC20 Wallet binding
+        function saveBoundWallet() {
+            const addr = document.getElementById('bind-trc-address').value.trim();
+            if (!addr.startsWith('T') || addr.length < 25) {
+                alert('সঠিক TRC20 ওয়ালেট অ্যাড্রেস দিন (যা T দিয়ে শুরু)!');
+                return;
+            }
+            appData.currentUser.walletAddress = addr;
+            saveState();
+            closeModal('wallet-bind-modal');
+            alert('✅ আপনার TRC20 ওয়ালেট সফলভাবে বাইন্ড করা হয়েছে:\n' + addr);
+        }
+
+        // 6. VIP Upgrade Logic
+        let selectedVIP = { title: '', cost: 0 };
+        function openNFTUpgradeModal(title, cost, desc) {
+            selectedVIP = { title, cost };
+            document.getElementById('upgrade-modal-title').innerHTML = `<i class="fa-solid fa-crown"></i> ${title}`;
+            document.getElementById('upgrade-modal-desc').textContent = desc;
+            document.getElementById('upgrade-modal-cost').textContent = cost.toFixed(2) + ' TRX';
+            document.getElementById('upgrade-modal-userbal').textContent = appData.currentUser.balance.toFixed(2) + ' TRX';
+            openModal('nft-upgrade-modal');
+        }
+
+        function executeNFTUpgrade() {
+            if (appData.currentUser.balance < selectedVIP.cost) {
+                alert(`এই লেভেল সক্রিয় করার জন্য আপনার আরও ${(selectedVIP.cost - appData.currentUser.balance).toFixed(2)} TRX প্রয়োজন! দয়া করে রিচার্জ করুন।`);
+                closeModal('nft-upgrade-modal');
+                openModal('recharge-modal');
+                return;
+            }
+
+            if (selectedVIP.cost > 0) {
+                appData.currentUser.balance -= selectedVIP.cost;
+                appData.currentUser.frozen += selectedVIP.cost;
+            }
+
+            appData.currentUser.level = selectedVIP.title.split(' ')[0] + ' ' + selectedVIP.title.split(' ')[1];
+            appData.currentUser.todayEarn += (selectedVIP.cost * 0.05);
+
+            appData.transactions.unshift({
+                id: 'LVL-' + Math.floor(1000 + Math.random() * 9000),
+                user: appData.currentUser.username,
+                type: 'VIP Upgrade',
+                amount: -selectedVIP.cost,
+                date: new Date().toLocaleTimeString(),
+                status: 'Approved',
+                note: selectedVIP.title
+            });
+
+            saveState();
+            syncUI();
+            closeModal('nft-upgrade-modal');
+            alert(`🎉 অভিনন্দন! আপনার অ্যাকাউন্টটি "${selectedVIP.title}" এ সফলভাবে আপগ্রেড হয়েছে!`);
+        }
+
+        // 7. Live AI Chatbot Simulation
+        function sendChatMessage() {
+            const input = document.getElementById('chat-input');
+            const logs = document.getElementById('chat-logs');
+            const text = input.value.trim();
+            if (!text) return;
+
+            // User message
+            const userP = document.createElement('p');
+            userP.style.cssText = "color:#38bdf8; margin-bottom:6px; text-align:right;";
+            userP.innerHTML = `<strong>You:</strong> ${text}`;
+            logs.appendChild(userP);
+            input.value = '';
+            logs.scrollTop = logs.scrollHeight;
+
+            // Intelligent response
+            setTimeout(() => {
+                let reply = "ধন্যবাদ মেসেজ দেওয়ার জন্য। ডিপোজিট বা উইথড্র বিষয়ে সাহায্য চাইলে হেল্প সেন্টারে যোগাযোগ করতে পারেন।";
+                const lower = text.toLowerCase();
+                if (lower.includes('recharge') || lower.includes('রিচার্জ') || lower.includes('deposit')) {
+                    reply = "রিচার্জ করার জন্য 'Home' বা 'Wallet' থেকে Recharge বাটনে চাপ দিয়ে দেওয়া অ্যাড্রেসে TRX সেন্ড করে TXID জমা দিন।";
+                } else if (lower.includes('withdraw') || lower.includes('উত্তোলন') || lower.includes('টাকা')) {
+                    reply = "উত্তোলন করার জন্য একাউন্টে নূন্যতম ২০ TRX এবং সঠিক ৬ ডিজিট পেমেন্ট পিন প্রয়োজন।";
+                } else if (lower.includes('admin') || lower.includes('অ্যাডমিন')) {
+                    reply = "অ্যাডমিন প্যানেলে লগইন করার জন্য লোগোতে ৩ বার স্পর্শ করুন এবং পাসওয়ার্ড দিন 'admin123' ।";
+                }
+
+                const botP = document.createElement('p');
+                botP.style.cssText = "color:#ffd700; margin-bottom:6px;";
+                botP.innerHTML = `<strong>স্মার্ট বট:</strong> ${reply}`;
+                logs.appendChild(botP);
+                logs.scrollTop = logs.scrollHeight;
+            }, 600);
+        }
+
+        // 8. Secret Admin Panel Controls
+        function renderAdminPanel() {
+            // Deposit Pending
+            const depCount = document.getElementById('admin-pending-dep-count');
+            const depList = document.getElementById('admin-deposit-list');
+            depCount.textContent = `(${appData.pendingDeposits.length})`;
+
+            if (appData.pendingDeposits.length === 0) {
+                depList.innerHTML = `<span style="color:#a0a5b5; font-size:11px;">কোন পেন্ডিং ডিপোজিট নেই।</span>`;
+            } else {
+                depList.innerHTML = appData.pendingDeposits.map((d, index) => `
+                    <div class="admin-list-item">
+                        <div><strong>ইউজার:</strong> ${d.user} | <strong>পরিমাণ:</strong> <span style="color:#22c55e;">${d.amount} TRX</span></div>
+                        <div style="font-size:10px; color:#a0a5b5; word-break:break-all;">TXID: ${d.txid}</div>
+                        <div class="admin-actions">
+                            <button class="btn-adm btn-adm-approve" onclick="adminApproveDeposit(${index})">Approve (ব্যালেন্সে যোগ)</button>
+                            <button class="btn-adm btn-adm-reject" onclick="adminRejectDeposit(${index})">Reject</button>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            // Withdrawal Pending
+            const withCount = document.getElementById('admin-pending-with-count');
+            const withList = document.getElementById('admin-withdraw-list');
+            withCount.textContent = `(${appData.pendingWithdrawals.length})`;
+
+            if (appData.pendingWithdrawals.length === 0) {
+                withList.innerHTML = `<span style="color:#a0a5b5; font-size:11px;">কোন পেন্ডিং উত্তোলন নেই।</span>`;
+            } else {
+                withList.innerHTML = appData.pendingWithdrawals.map((w, index) => `
+                    <div class="admin-list-item">
+                        <div><strong>ইউজার:</strong> ${w.user} | <strong>পরিমাণ:</strong> <span style="color:#ef4444;">${w.amount} TRX</span></div>
+                        <div style="font-size:10px; color:#a0a5b5;">মেথড: ${w.method} | অ্যাড্রেস: ${w.address}</div>
+                        <div class="admin-actions">
+                            <button class="btn-adm btn-adm-approve" onclick="adminApproveWithdraw(${index})">Approve (পেইড)</button>
+                            <button class="btn-adm btn-adm-reject" onclick="adminRejectWithdraw(${index})">Reject (রিফান্ড)</button>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            // User list
+            document.getElementById('admin-total-users-count').textContent = appData.registeredUsers.length;
+            const usersContainer = document.getElementById('admin-users-list');
+            usersContainer.innerHTML = appData.registeredUsers.map(u => `
+                <div style="display:flex; justify-content:space-between; padding:6px 0; border-bottom:1px solid #232a40; font-size:11px;">
+                    <span><i class="fa-solid fa-user"></i> ${u.username} (${u.phone})</span>
+                    <span style="color:#ffd700;">${u.balance.toFixed(2)} TRX | ${u.level}</span>
+                </div>
+            `).join('');
+        }
+
+        // Admin Action: Approve Deposit
+        function adminApproveDeposit(index) {
+            const dep = appData.pendingDeposits[index];
+            if (dep.user === appData.currentUser.username) {
+                appData.currentUser.balance += dep.amount;
+                appData.currentUser.totalRev += dep.amount;
+            }
+
+            // Update main transaction state
+            const targetTx = appData.transactions.find(t => t.id === dep.id);
+            if (targetTx) targetTx.status = 'Approved';
+
+            appData.pendingDeposits.splice(index, 1);
+            saveState();
+            syncUI();
+            alert('ডিপোজিট সফলভাবে অনুমোদিত হয়েছে এবং ব্যালেন্স যোগ হয়েছে!');
+        }
+
+        // Admin Action: Reject Deposit
+        function adminRejectDeposit(index) {
+            const dep = appData.pendingDeposits[index];
+            const targetTx = appData.transactions.find(t => t.id === dep.id);
+            if (targetTx) targetTx.status = 'Rejected';
+
+            appData.pendingDeposits.splice(index, 1);
+            saveState();
+            syncUI();
+            alert('ডিপোজিট বাতিল (Reject) করা হয়েছে!');
+        }
+
+        // Admin Action: Approve Withdraw
+        function adminApproveWithdraw(index) {
+            const item = appData.pendingWithdrawals[index];
+            const targetTx = appData.transactions.find(t => t.id === item.id);
+            if (targetTx) targetTx.status = 'Approved';
+
+            appData.pendingWithdrawals.splice(index, 1);
+            saveState();
+            syncUI();
+            alert('উত্তোলন পেইড হিসেবে অনুমোদন করা হয়েছে!');
+        }
+
+        // Admin Action: Reject Withdraw (Refund)
+        function adminRejectWithdraw(index) {
+            const item = appData.pendingWithdrawals[index];
+            if (item.user === appData.currentUser.username) {
+                appData.currentUser.balance += item.amount; // Refund
+            }
+
+            const targetTx = appData.transactions.find(t => t.id === item.id);
+            if (targetTx) targetTx.status = 'Rejected';
+
+            appData.pendingWithdrawals.splice(index, 1);
+            saveState();
+            syncUI();
+            alert('উত্তোলন বাতিল করা হয়েছে এবং ইউজার ব্যালেন্স রিফান্ড হয়েছে!');
+        }
+
+        // Admin Quick Bonus Tool
+        function quickAdminAddBonus() {
+            appData.currentUser.balance += 50.00;
+            appData.transactions.unshift({
+                id: 'ADM-' + Math.floor(1000 + Math.random() * 9000),
+                user: appData.currentUser.username,
+                type: 'Admin Grant',
+                amount: 50.00,
+                date: new Date().toLocaleTimeString(),
+                status: 'Approved',
+                note: 'Special Bonus from Admin'
+            });
+            saveState();
+            syncUI();
+            alert('ইউজারের ওয়ালেটে ৫০.০০ TRX অতিরিক্ত বোনাস যোগ করা হয়েছে!');
+        }
+
+        // Logout
+        function handleLogout() {
+            if (confirm('আপনি কি নিশ্চিতভাবে আপনার একাউন্ট লগআউট করতে চান?')) {
+                document.getElementById('main-app-container').style.display = 'none';
+                document.getElementById('screen-auth').style.display = 'block';
+                switchAuthTab('login');
+            }
+        }
+
+        // System Startup
+        loadState();
+        syncUI();
+    </script>
+</body>
+</html>

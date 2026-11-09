@@ -72,7 +72,24 @@
             padding: 30px 20px;
             background: radial-gradient(circle at top, #1a1e2e 0%, #08090d 100%);
             min-height: 100vh;
-        }
+        }             <!-- SCREEN: HISTORY / TRANSACTION LOG -->
+            <div id="screen-history" class="screen-view">
+                <div class="page-content">
+                    <div class="section-header">
+                        <h2><i class="fa-solid fa-clock-rotate-left"></i> সকল লেনদেনের হিস্ট্রি</h2>
+                    </div>
+
+                    <div style="background: #141828; border-radius: 14px; padding: 15px; border: 1px solid rgba(255, 255, 255, 0.05);">
+                        <p style="font-size: 11px; color: #a0a5b5; margin-bottom: 12px;">আপনার একাউন্টের বিগত সকল ডিপোজিট, উইথড্র ও রিওয়ার্ডের বিস্তারিত রেকর্ড:</p>
+                        
+                        <!-- ডায়নামিক হিস্ট্রি লিস্ট -->
+                        <div id="full-history-list" style="display: flex; flex-direction: column; gap: 8px;">
+                            <!-- এখানে স্বয়ংক্রিয়ভাবে হিস্ট্রি লোড হবে -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+}
 
         .auth-container {
             background: rgba(18, 22, 36, 0.85);
